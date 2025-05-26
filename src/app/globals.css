@@ -118,4 +118,11 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Custom container styles */
+  .container {
+    @apply px-4 sm:px-6 lg:px-8;
+    width: 100%;
+    max-width: 100%;
+  }
 }
