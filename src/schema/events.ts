@@ -1,9 +1,5 @@
 import { z } from "zod";
 
-export type EventFormValues = z.infer<typeof eventFormSchema> & {
-  isActive: boolean;
-};
-
 export const eventFormSchema = z.object({
   name: z.string().min(1, "Required"),
   description: z.string().optional(),

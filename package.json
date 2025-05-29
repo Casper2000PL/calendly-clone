@@ -17,6 +17,7 @@
     "@neondatabase/serverless": "^1.0.0",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-select": "^2.2.5",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.2.5",
     "class-variance-authority": "^0.7.1",
@@ -28,6 +29,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.56.4",
+    "select": "^1.1.2",
+    "shadcn": "^2.5.0",
     "tailwind-merge": "^3.3.0",
     "use-server": "^0.4.9",
     "zod": "^3.25.28"

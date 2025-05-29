@@ -1,10 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { eventFormSchema, EventFormValues } from "@/schema/events";
+import { eventFormSchema } from "@/schema/events";
 import {
   Form,
   FormControl,
@@ -19,21 +19,43 @@ import { Button } from "../ui/button";
 import Link from "next/link";
 import { Textarea } from "../ui/textarea";
 import { Switch } from "../ui/switch";
-import { createEvent } from "@/server/actions/events";
+import { createEvent, deleteEvent, updateEvent } from "@/server/actions/events";
+import {
+  AlertDialog,
+  AlertDialogHeader,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "../ui/alert-dialog";
 
-const EventForm = () => {
-  const form = useForm<EventFormValues>({
+const EventForm = ({
+  event,
+}: {
+  event?: {
+    id: string;
+    name: string;
+    description?: string;
+    isActive: boolean;
+    durationInMinutes: number;
+  };
+}) => {
+  const [isDeletePending, startDeleteTransition] = useTransition();
+
+  const form = useForm<z.infer<typeof eventFormSchema>>({
     resolver: zodResolver(eventFormSchema),
-    defaultValues: {
-      name: "",
-      description: "",
+    defaultValues: event ?? {
       isActive: true,
       durationInMinutes: 30,
     },
   });
 
-  const onSubmit = async (values: EventFormValues) => {
-    const data = await createEvent(values);
+  const onSubmit = async (values: z.infer<typeof eventFormSchema>) => {
+    const action = !event ? createEvent : updateEvent.bind(null, event.id);
+    const data = await action(values);
 
     if (data?.error) {
       form.setError("root", {
@@ -46,29 +68,28 @@ const EventForm = () => {
 
   return (
     <Form {...form}>
-      {form.formState.errors.root && (
-        <div className="text-destructive mb-4">
-          {form.formState.errors.root.message}
-        </div>
-      )}
-
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex gap-6 flex-col"
       >
+        {form.formState.errors.root && (
+          <div className="text-destructive text-sm">
+            {form.formState.errors.root.message}
+          </div>
+        )}
         <FormField
           control={form.control}
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>Event Name</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
               <FormDescription>
-                The name user will see when booking
+                The name users will see when booking
               </FormDescription>
-              <FormMessage></FormMessage>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -82,7 +103,7 @@ const EventForm = () => {
                 <Input type="number" {...field} />
               </FormControl>
               <FormDescription>In minutes</FormDescription>
-              <FormMessage></FormMessage>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -91,12 +112,14 @@ const EventForm = () => {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Duration</FormLabel>
+              <FormLabel>Description</FormLabel>
               <FormControl>
                 <Textarea className="resize-none h-32" {...field} />
               </FormControl>
-              <FormDescription>Description</FormDescription>
-              <FormMessage></FormMessage>
+              <FormDescription>
+                Optional description of the event
+              </FormDescription>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -121,10 +144,61 @@ const EventForm = () => {
           )}
         />
         <div className="flex gap-2 justify-end">
-          <Button type="button" asChild variant="outline">
+          {event && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="destructive"
+                  disabled={isDeletePending || form.formState.isSubmitting}
+                >
+                  Delete
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete
+                    your this event.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    disabled={isDeletePending || form.formState.isSubmitting}
+                    onClick={() => {
+                      startDeleteTransition(async () => {
+                        const data = await deleteEvent(event.id);
+
+                        if (data?.error) {
+                          form.setError("root", {
+                            message: "There was an error deleting your event",
+                          });
+                        }
+                      });
+                    }}
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+
+          <Button
+            disabled={isDeletePending || form.formState.isSubmitting}
+            type="button"
+            asChild
+            variant="outline"
+          >
             <Link href="/events">Cancel</Link>
           </Button>
-          <Button type="submit">Save</Button>
+          <Button
+            disabled={isDeletePending || form.formState.isSubmitting}
+            type="submit"
+          >
+            Save
+          </Button>
         </div>
       </form>
     </Form>

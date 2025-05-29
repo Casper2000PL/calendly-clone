@@ -5,7 +5,7 @@ const NewEventPage = () => {
   return (
     <Card className="max-w-md mx-auto">
       <CardHeader>
-        <CardTitle>New Event</CardTitle>
+        <CardTitle className="text-2xl">New Event</CardTitle>
       </CardHeader>
       <CardContent>
         <EventForm />
