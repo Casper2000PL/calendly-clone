@@ -1,7 +1,7 @@
 import React from "react";
 
-const page = () => {
+const BookEventPage = () => {
   return <div>Link sthng</div>;
 };
 
-export default page;
+export default BookEventPage;

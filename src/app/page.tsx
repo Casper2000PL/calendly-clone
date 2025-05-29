@@ -5,8 +5,7 @@ import { redirect } from "next/navigation";
 
 export default async function Home() {
   const { userId } = await auth();
-
-  if (!userId) redirect("/events");
+  if (userId != null) redirect("/events");
 
   return (
     <div className="text-center container my-4 mx-auto">
