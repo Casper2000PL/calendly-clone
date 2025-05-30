@@ -48,6 +48,8 @@ const EventForm = ({
   const form = useForm<z.infer<typeof eventFormSchema>>({
     resolver: zodResolver(eventFormSchema),
     defaultValues: event ?? {
+      name: "", // Add default empty string for name
+      description: "", // Add default empty string for description
       isActive: true,
       durationInMinutes: 30,
     },
